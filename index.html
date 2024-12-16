@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube to MP3 Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .video-info {
+      margin-top: 20px;
+    }
+    #downloadBtn {
+      display: none;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #downloadBtn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube to MP3 Converter</h1>
+  <label for="youtubeId">Enter YouTube Video ID:</label>
+  <input type="text" id="youtubeId" placeholder="e.g., UxxajLWwzqY" />
+  <button id="convertBtn">Convert</button>
+
+  <div class="video-info" id="videoInfo" style="display: none;">
+    <h3 id="videoTitle"></h3>
+    <p><strong>Author:</strong> <span id="videoAuthor"></span></p>
+    <img id="videoThumb" src="" alt="Video Thumbnail" style="width: 200px; height: auto;" />
+    <button id="downloadBtn" onclick="downloadMP3()">Download MP3</button>
+  </div>
+
+  <script>
+    document.getElementById('convertBtn').addEventListener('click', function () {
+      const videoId = document.getElementById('youtubeId').value.trim();
+
+      if (!videoId) {
+        alert('Please enter a valid YouTube video ID!');
+        return;
+      }
+
+      // Set up API call
+      const xhr = new XMLHttpRequest();
+      const apiUrl = `https://youtube-mp3-download1.p.rapidapi.com/dl?id=${videoId}`;
+
+      xhr.open('GET', apiUrl);
+      xhr.setRequestHeader('x-rapidapi-key', 'bd24a08d03msh18a10de8902d9e3p1d4ab7jsnfd104cebe558');
+      xhr.setRequestHeader('x-rapidapi-host', 'youtube-mp3-download1.p.rapidapi.com');
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.status === 'ok') {
+              // Populate the page with video info
+              document.getElementById('videoInfo').style.display = 'block';
+              document.getElementById('videoTitle').textContent = response.title;
+              document.getElementById('videoAuthor').textContent = response.author;
+              document.getElementById('videoThumb').src = response.thumb;
+
+              // Show the download button
+              document.getElementById('downloadBtn').style.display = 'inline-block';
+
+              // Save the download link in a global variable
+              window.downloadLink = response.link;
+            } else {
+              alert('Error: ' + response.status);
+            }
+          } else {
+            alert('Failed to fetch data. Please try again later.');
+          }
+        }
+      };
+
+      xhr.send(null);
+    });
+
+    function downloadMP3() {
+      if (window.downloadLink) {
+        window.location.href = window.downloadLink;
+      } else {
+        alert('Download link is not available.');
+      }
+    }
+  </script>
+</body>
+</html>
